@@ -7,7 +7,6 @@ var debug = require('debug')('*');
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(require('body-parser').json());
 
-
 app.use(function errorHandler(err, req, res) {
   debug('err %o, req %o, res %o', err, req, res);
 });

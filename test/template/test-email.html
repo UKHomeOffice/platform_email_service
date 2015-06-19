@@ -5,6 +5,12 @@
 </head>
 <body>
   <h1>Hello {{data.firstname}} {{data.familyname}}</h1>
-  <p>Your data is {{data.foo}}</p>
+  <p>Your data is:
+    <ul>
+    {{#each data}}
+    <li>{{@index}}. {{this}}</li>
+    {{/each}}
+  </ul>
+  </p>
 </body>
 </html>

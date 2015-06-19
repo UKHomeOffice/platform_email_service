@@ -1,14 +1,18 @@
 'use strict';
 
 var fs = require('fs');
-var templateEngine = require('hogan-express-strict');
+var templateEngine = require('handlebars');
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
+var promise = require('bluebird');
+
+promise.promisifyAll(fs);
 
 var SmtpService = function SmtpService(emailModel) {
   this.dataModel = emailModel || {};
   this.template = null;
   this.compiledTemplate = null;
+  this.populatedTemplate = '';
 
   this.createTransport();
 };
@@ -37,15 +41,12 @@ SmtpService.prototype.createTransport = function createTransport() {
  * Load an email template specified in the body of the model
  */
 SmtpService.prototype.loadTemplate = function loadTemplate() {
-  if (undefined !== this.dataModel.template) {
-    fs.readFile(this.dataModel.template, function loadTemplateFile(error, data) {
-      if (error) {
-        throw error;
-      }
-
-      this.template = data;
-    });
-  }
+  fs.readFileAsync(this.dataModel.template).then(function bindTemplate(data) {
+    this.template = data;
+  }.bind(this))
+  .catch(function exceptionHandler(error) {
+    throw error;
+  });
 };
 
 /**
@@ -53,26 +54,40 @@ SmtpService.prototype.loadTemplate = function loadTemplate() {
  * @returns {*|String}
  */
 SmtpService.prototype.prepareContent = function prepareContent() {
-  if (this.template === null) {
-    this.loadTemplate();
-  }
 
-  this.compiledTemplate = templateEngine.compile(this.template);
-  return this.compiledTemplate.render(this.dataModel.data);
+  fs.readFileAsync(this.dataModel.template).then(function bindData() {
+      this.compiledTemplate = templateEngine.compile(this.template.toString());
+      this.populatedTemplate = this.compiledTemplate(this.dataModel);
+
+    return this.populatedTemplate;
+    }.bind(this));
 };
 
+/**
+ * Sets a property if it's defined
+ * @param key
+ * @param value
+ */
 SmtpService.prototype.set = function set(key, value) {
   if (this.hasOwnProperty(key) === true) {
     this[key] = value;
   }
 };
 
+/**
+ * Retrieves our defined property
+ * @param key
+ * @returns {*}
+ */
 SmtpService.prototype.get = function get(key) {
   if (this.hasOwnProperty(key) === true) {
     return this[key];
   }
 };
 
+/**
+ * Where the magic happens
+ */
 SmtpService.prototype.send = function send() {
   if (this.compiledTemplate === null) {
     this.loadTemplate();
@@ -84,7 +99,7 @@ SmtpService.prototype.send = function send() {
     to: this.dataModel.recipient,
     subject: this.dataModel.subject,
     html: this.compiledTemplate,
-    text: JSON.stringify(this.dataModel.data)
+    generateTextFromHTML: true
   };
 
   this.emailTransport.sendMail(mailOptions, function processResponse(error, response) {

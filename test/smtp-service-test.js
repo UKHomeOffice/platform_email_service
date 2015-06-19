@@ -2,6 +2,9 @@
 
 var model = new (require('../service/smtp-service'))();
 var fs = require('fs');
+var promise = require('bluebird');
+
+promise.promisifyAll(fs);
 
 function testLoadedFile(expectedTemplate) {
   expect(model.template).to.equal(expectedTemplate);
@@ -48,23 +51,24 @@ describe('I can manipulate email templates', function emailTemplateManipulation(
   });
 
   it('and load a template into a variable', function testLoadTemplate() {
-    fs.readFile(newModel.template, function loadTemplateFile(error, data) {
-      if (error) {
-        console.log(error.message);
-      }
+    fs.readFileAsync(newModel.template).then(function bindTemplate(data) {
       expectedTemplate = data;
-
       testLoadedFile(expectedTemplate);
+    })
+    .catch(function exception(error) {
+        console.log(error.message);
     });
 
     model.set('dataModel', newModel);
     model.loadTemplate();
   });
 
-  /*it ('and can populate a loaded template with data', function testPopulateTemplate() {
+  it('and can populate a loaded template with data', function testPopulateTemplate() {
     model.set('dataModel', newModel);
-    var result = model.prepareContent();
-    console.log(result);
 
-  });*/
+    var testPromise = new Promise(function wrapPromiseCall(resolve, reject) {
+      model.prepareContent({success: resolve, error: reject});
+      console.log(testPromise);
+    });
+  });
 });
