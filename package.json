@@ -26,6 +26,7 @@
   "dependencies": {
     "body-parser": "^1.13.1",
     "express": "^4.12.4",
+    "hogan-express-strict": "^0.5.4",
     "nodemailer": "^1.3.4",
     "nodemailer-smtp-transport": "^1.0.3"
   },
