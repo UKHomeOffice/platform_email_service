@@ -1,5 +1,8 @@
 'use strict';
 
+// Disable self signed testing for the tests
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 var model = new (require('../service/smtp-service'))();
 var fs = require('fs');
 var promise = require('bluebird');
@@ -81,3 +84,17 @@ describe('I can manipulate email templates', function emailTemplateManipulation(
     });
   });
 });
+
+describe('I can send an email', function testSendingEmail() {
+  it(' and it will throw an error of the template is not prepared', function testException(done) {
+
+    model.send().then(function emailSuccess(response) {
+      console.log(response);
+    })
+    .catch(function exception(error) {
+      console.log(error);
+    });
+    done();
+  });
+});
+

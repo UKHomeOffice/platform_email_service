@@ -93,9 +93,8 @@ SmtpService.prototype.get = function get(key) {
  * Where the magic happens
  */
 SmtpService.prototype.send = function send() {
-  if (this.compiledTemplate === null) {
-    this.loadTemplate();
-    this.prepareContent();
+  if (this.populatedTemplate === null) {
+    throw new Error('Email template is not prepared');
   }
 
   var mailOptions = {
@@ -103,16 +102,23 @@ SmtpService.prototype.send = function send() {
     to: this.dataModel.recipient,
     subject: this.dataModel.subject,
     html: this.compiledTemplate,
-    generateTextFromHTML: true
+    generateTextFromHTML: true,
+    secure: false,
+    ignoreTLS: true,
+    tls: {
+      rejectUnauthorized: false
+    }
   };
 
-  this.emailTransport.sendMail(mailOptions, function processResponse(error, response) {
-    if (error) {
-      throw error;
-    } else {
-      return {success: true, message: response.message};
-    }
-  });
+  return new Promise(function sendMailAysnc(res, rej) {
+    this.emailTransport.sendMail(mailOptions, function callback(error, info) {
+      if (error) {
+        rej(error);
+      } else {
+        res(info.response);
+      }
+    });
+  }.bind(this));
 };
 
 module.exports = SmtpService;
