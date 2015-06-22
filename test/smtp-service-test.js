@@ -10,7 +10,7 @@ var promise = require('bluebird');
 promise.promisifyAll(fs);
 
 function testLoadedFile(expectedTemplate) {
-  expect(model.template).to.deep.equal(expectedTemplate);
+  expect(model.template).to.deep.equal(expectedTemplate.toString());
 }
 
 var newModel = {

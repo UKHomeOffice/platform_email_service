@@ -17,6 +17,10 @@ var SmtpService = function SmtpService(emailModel) {
   this.createTransport();
 };
 
+SmtpService.prototype.getTemplatePath = function getTemplatePath() {
+  return this.dataModel.template;
+};
+
 /**
  * Create our transport mechanism from config and return it
  */
@@ -41,8 +45,8 @@ SmtpService.prototype.createTransport = function createTransport() {
  * Load an email template specified in the body of the model
  */
 SmtpService.prototype.loadTemplate = function loadTemplate() {
-  return fs.readFileAsync(this.dataModel.template).then(function bindTemplate(data) {
-    this.template = data;
+  return fs.readFileAsync(this.getTemplatePath()).then(function bindTemplate(data) {
+    this.template = data.toString();
     return this.template;
   }.bind(this))
   .catch(function exceptionHandler(error) {
@@ -55,10 +59,9 @@ SmtpService.prototype.loadTemplate = function loadTemplate() {
  * @returns {*|String}
  */
 SmtpService.prototype.prepareContent = function prepareContent() {
-
-  return fs.readFileAsync(this.dataModel.template).then(function bindData(data) {
-    this.template = data;
-    this.compiledTemplate = templateEngine.compile(this.template.toString());
+  return fs.readFileAsync(this.getTemplatePath()).then(function bindData(data) {
+    this.template = data.toString();
+    this.compiledTemplate = templateEngine.compile(this.template);
     this.populatedTemplate = this.compiledTemplate(this.dataModel);
     return this.populatedTemplate;
   }.bind(this))
@@ -105,12 +108,12 @@ SmtpService.prototype.send = function send() {
     generateTextFromHTML: true,
   };
 
-  return new Promise(function sendMailAysnc(res, rej) {
+  return new Promise(function sendMailAysnc(resolve, reject) {
     this.emailTransport.sendMail(mailOptions, function callback(error, info) {
       if (error) {
-        rej(error);
+        reject(error);
       } else {
-        res(info);
+        resolve(info);
       }
     });
   }.bind(this));
