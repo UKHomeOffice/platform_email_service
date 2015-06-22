@@ -15,7 +15,7 @@ function testLoadedFile(expectedTemplate) {
 
 var newModel = {
   sender: 'test@localhost',
-  recipient: 'brett.minnie@gmail.com',
+  recipient: 'recipient@localhost',
   subject: 'This is a test message',
   template: './test/template/test-email.html',
   data: {
@@ -86,15 +86,44 @@ describe('I can manipulate email templates', function emailTemplateManipulation(
 });
 
 describe('I can send an email', function testSendingEmail() {
-  it(' and it will throw an error of the template is not prepared', function testException(done) {
+  it(' and it will return a connection refused error when the server is not present', function testException(done) {
 
-    model.send().then(function emailSuccess(response) {
-      console.log(response);
-    })
-    .catch(function exception(error) {
-      console.log(error);
+    var expectedError = {
+      code: 'ECONNREFUSED',
+      errno: 'ECONNREFUSED',
+      syscall: 'connect'
+    };
+
+    model.send().catch(function exception(error) {
+      Object.keys(expectedError).foreach(function testResponse(key) {
+        expect(error[key]).to.equal(expectedError[key]);
+        done();
+      });
     });
+
     done();
+  });
+
+  it(' and it will return a 250 Ok on success', function testException() {
+
+    var expectedResult = {
+      accepted: ['recipient@localhost'],
+      rejected: [],
+      response: '250 Ok',
+      envelope: {
+        from: 'test@localhost', to: ['recipient@localhost']
+      },
+      messageId: '1434985907371-bf97b39f-bae621cb-d0917196@localhost'
+    };
+
+    var mock = sinon.mock(model);
+
+    mock.expects('send')
+      .once()
+      .returns(expectedResult);
+
+    expect(model.send()).to.deep.equal(expectedResult);
+
   });
 });
 

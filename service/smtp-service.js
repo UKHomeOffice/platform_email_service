@@ -103,11 +103,6 @@ SmtpService.prototype.send = function send() {
     subject: this.dataModel.subject,
     html: this.compiledTemplate,
     generateTextFromHTML: true,
-    secure: false,
-    ignoreTLS: true,
-    tls: {
-      rejectUnauthorized: false
-    }
   };
 
   return new Promise(function sendMailAysnc(res, rej) {
@@ -115,7 +110,7 @@ SmtpService.prototype.send = function send() {
       if (error) {
         rej(error);
       } else {
-        res(info.response);
+        res(info);
       }
     });
   }.bind(this));
