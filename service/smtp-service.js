@@ -41,8 +41,9 @@ SmtpService.prototype.createTransport = function createTransport() {
  * Load an email template specified in the body of the model
  */
 SmtpService.prototype.loadTemplate = function loadTemplate() {
-  fs.readFileAsync(this.dataModel.template).then(function bindTemplate(data) {
+  return fs.readFileAsync(this.dataModel.template).then(function bindTemplate(data) {
     this.template = data;
+    return this.template;
   }.bind(this))
   .catch(function exceptionHandler(error) {
     throw error;
@@ -55,12 +56,15 @@ SmtpService.prototype.loadTemplate = function loadTemplate() {
  */
 SmtpService.prototype.prepareContent = function prepareContent() {
 
-  fs.readFileAsync(this.dataModel.template).then(function bindData() {
-      this.compiledTemplate = templateEngine.compile(this.template.toString());
-      this.populatedTemplate = this.compiledTemplate(this.dataModel);
-
+  return fs.readFileAsync(this.dataModel.template).then(function bindData(data) {
+    this.template = data;
+    this.compiledTemplate = templateEngine.compile(this.template.toString());
+    this.populatedTemplate = this.compiledTemplate(this.dataModel);
     return this.populatedTemplate;
-    }.bind(this));
+  }.bind(this))
+  .catch(function exceptionHandler(error) {
+    throw error;
+  });
 };
 
 /**

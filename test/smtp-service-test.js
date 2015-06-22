@@ -7,7 +7,7 @@ var promise = require('bluebird');
 promise.promisifyAll(fs);
 
 function testLoadedFile(expectedTemplate) {
-  expect(model.template).to.equal(expectedTemplate);
+  expect(model.template).to.deep.equal(expectedTemplate);
 }
 
 var newModel = {
@@ -50,25 +50,34 @@ describe('I can manipulate email templates', function emailTemplateManipulation(
     expect(model.template).to.equal(null);
   });
 
-  it('and load a template into a variable', function testLoadTemplate() {
+  it('and load a template into a variable', function testLoadTemplate(done) {
+    model.set('dataModel', newModel);
     fs.readFileAsync(newModel.template).then(function bindTemplate(data) {
       expectedTemplate = data;
-      testLoadedFile(expectedTemplate);
+      model.loadTemplate().then(function testMatch() {
+        testLoadedFile(expectedTemplate);
+        done();
+      });
     })
     .catch(function exception(error) {
-        console.log(error.message);
+      console.log(error.message);
+      done();
     });
-
-    model.set('dataModel', newModel);
-    model.loadTemplate();
   });
 
-  it('and can populate a loaded template with data', function testPopulateTemplate() {
+  it('and can populate a loaded template with data', function testPopulateTemplate(done) {
     model.set('dataModel', newModel);
+    model.prepareContent().then(function testParsedTemplate() {
+      expect(model.populatedTemplate).to.be.a('string');
 
-    var testPromise = new Promise(function wrapPromiseCall(resolve, reject) {
-      model.prepareContent({success: resolve, error: reject});
-      console.log(testPromise);
+      Object.keys(newModel.data).forEach(function iterateDate(key) {
+        expect(model.populatedTemplate.indexOf(newModel.data[key]) > -1).to.equal(true);
+      });
+      done();
+    })
+    .catch(function exception(error) {
+      console.log(error.message);
+      done();
     });
   });
 });
