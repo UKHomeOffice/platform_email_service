@@ -46,7 +46,7 @@ SmtpService.prototype.createTransport = function createTransport() {
  * Load an email template specified in the body of the model
  */
 SmtpService.prototype.loadTemplate = function loadTemplate() {
-  return templateService.getTemplate(this.getTemplatePath()).then(function bindTemplate() {
+  return templateService.loadTemplate(this.getTemplatePath()).then(function bindTemplate() {
     this.template = templateService.getTemplateAsString();
     return this.template;
   }.bind(this))
@@ -60,7 +60,7 @@ SmtpService.prototype.loadTemplate = function loadTemplate() {
  * @returns {*|String}
  */
 SmtpService.prototype.prepareContent = function prepareContent() {
-  return templateService.getTemplate(this.getTemplatePath()).then(function bindData() {
+  return templateService.loadTemplate(this.getTemplatePath()).then(function bindData() {
     this.template = templateService.getTemplateAsString();
     this.compiledTemplate = templateEngine.compile(this.template);
     this.populatedTemplate = this.compiledTemplate(this.dataModel);
