@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var templateEngine = require('handlebars');
+var templateService = new (require('./template-service'))();
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 var promise = require('bluebird');
@@ -45,8 +46,8 @@ SmtpService.prototype.createTransport = function createTransport() {
  * Load an email template specified in the body of the model
  */
 SmtpService.prototype.loadTemplate = function loadTemplate() {
-  return fs.readFileAsync(this.getTemplatePath()).then(function bindTemplate(data) {
-    this.template = data.toString();
+  return templateService.getTemplate(this.getTemplatePath()).then(function bindTemplate() {
+    this.template = templateService.getTemplateAsString();
     return this.template;
   }.bind(this))
   .catch(function exceptionHandler(error) {
@@ -59,8 +60,8 @@ SmtpService.prototype.loadTemplate = function loadTemplate() {
  * @returns {*|String}
  */
 SmtpService.prototype.prepareContent = function prepareContent() {
-  return fs.readFileAsync(this.getTemplatePath()).then(function bindData(data) {
-    this.template = data.toString();
+  return templateService.getTemplate(this.getTemplatePath()).then(function bindData() {
+    this.template = templateService.getTemplateAsString();
     this.compiledTemplate = templateEngine.compile(this.template);
     this.populatedTemplate = this.compiledTemplate(this.dataModel);
     return this.populatedTemplate;
