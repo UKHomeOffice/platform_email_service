@@ -77,7 +77,7 @@ TemplateService.prototype.listTemplates = function listTemplates(basePath) {
     return data;
   })
   .catch(function error(err) {
-      throw err;
+    throw err;
   });
 };
 
