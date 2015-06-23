@@ -15,15 +15,11 @@ app.post('/email/send', emailApi.sendEmail);
 
 // Template api endpoints
 app.post('/template/add', templateApi.addTemplate);
-app.all('/template/get/:templateName', templateApi.getTemplate);
-app.all('/template/list', templateApi.listTemplates);
+app.get('/template/get/:templateName', templateApi.getTemplate);
+app.get('/template/list', templateApi.listTemplates);
 app.put('/template/update/:templateName', templateApi.updateTemplate);
 app.delete('/template/delete/:templateName', templateApi.deleteTemplate);
 
 app.listen(require('./config').PORT);
-
-app.use(function errorHandler(err, req, res) {
-  debug('err %o, req %o, res %o', err, req, res);
-});
 
 debug('Email service listening on port %o', require('./config').PORT);
