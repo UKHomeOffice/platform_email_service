@@ -10,7 +10,7 @@ exports.sendEmail = function sendEmail(req, res, next) {
   emailService.loadTemplate().then(function templateLoaded() {
     emailService.prepareContent().then(function contentPrepared() {
       emailService.send().then(function mailSent(result) {
-        res.status(200).send(result);
+        res.status(201).send(result);
       });
     });
   })
