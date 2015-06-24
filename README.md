@@ -5,12 +5,16 @@ Email Microservice in NodeJS
 
 Getting started
 
-Edit `config/smtp.json` to point to your smtp server
+If you need a development mail server I suggest [Fake SMTP](https://nilhcem.github.io/FakeSMTP/) no setup, just follow the instructions.
+
+Edit `config/smtp.json` to point to your smtp server (if using FakeSMTP bind this to port 8082 and set that as your port in this file)
 Edit `config/template.json` to point to your template path
 
 `$ npm install`
 
 `$ node app.js`
+
+
 
 ## Template API End points
 These will be deprecated in the future
