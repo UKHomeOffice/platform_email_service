@@ -3,89 +3,80 @@
 var templateService = new (require('../service/template-service'))();
 var templateConfig = require('../config/template.json');
 
-exports.addTemplate = function addTemplate(request, result, next) {
-  var templatePath = request.body.templatepath || templateConfig.installationPath;
-  var body = request.body.templateBody;
-  var name = request.body.templateName;
+exports.addTemplate = function addTemplate(req, res, next) {
+  var templatePath = req.body.templatepath || templateConfig.installationPath;
+  var body = req.body.templateBody;
+  var name = req.body.templateName;
 
   templateService.addTemplate(templatePath + '/' + name, body).then(function templateCreated() {
-    result.status(201);
-    result.send(
+    res.status(201).send(
       {
         filename: name,
         length: body.length
       }
     )
     .catch(function error(err) {
-      result.status(err.code);
-      result.send(err);
+      res.status(err.code).send(err);
       next(err);
     });
   });
 };
 
-exports.getTemplate = function getTemplate(request, result, next) {
-  var templatePath = request.headers.templatepath || templateConfig.installationPath;
-  var templateName = request.param('templateName');
+exports.getTemplate = function getTemplate(req, res, next) {
+  var templatePath = req.headers.templatepath || templateConfig.installationPath;
+  var templateName = req.param('templateName');
 
   templateService.loadTemplate(templatePath + '/' + templateName).then(function returnTemplate() {
-    result.status(200);
-    var template = templateService.getTemplateAsString();
-    result.send({body: template});
+    res.status(200).send({
+      body: templateService.getTemplateAsString()
+    });
   })
   .catch(function error(err) {
-    result.status(err.code);
-    result.send(err);
+    res.status(err.code).send(err);
     next(err);
   });
 };
 
-exports.listTemplates = function listTemplates(request, result, next) {
-  var templatePath = request.headers.templatepath || templateConfig.installationPath;
+exports.listTemplates = function listTemplates(req, res, next) {
+  var templatePath = req.headers.templatepath || templateConfig.installationPath;
 
   templateService.listTemplates(templatePath).then(function returnList(data) {
-    result.status(200);
-    result.send(data);
+    res.status(200).send(data);
   })
   .catch(function error(err) {
-    result.status(err.code);
-    result.send(err);
+    res.status(err.code).send(err);
     next(err);
   });
 };
 
-exports.updateTemplate = function updateTemplate(request, result, next) {
-  var templatePath = request.body.templatepath || templateConfig.installationPath;
-  var body = request.body.templateBody;
-  var name = request.param('templateName');
+exports.updateTemplate = function updateTemplate(req, res, next) {
+  var templatePath = req.body.templatepath || templateConfig.installationPath;
+  var body = req.body.templateBody;
+  var name = req.param('templateName');
 
   templateService.updateTemplate(templatePath + '/' + name, body).then(function templateCreated() {
-    result.status(200);
-    result.send({
+    res.status(200).send({
       filename: name,
       length: body.length
     });
   })
   .catch(function error(err) {
-    result.status(err.code);
-    result.send(err);
+    res.status(err.code).send(err);
     next(err);
   });
 };
 
-exports.deleteTemplate = function deleteTemplate(request, result, next) {
-  var templatePath = request.body.templatepath || templateConfig.installationPath;
-  var name = request.param('templateName');
+exports.deleteTemplate = function deleteTemplate(req, res, next) {
+  var templatePath = req.body.templatepath || templateConfig.installationPath;
+  var name = req.param('templateName');
 
   templateService.deleteTemplate(templatePath + '/' + name).then(function templateDeleted() {
-    result.status(204);
-    result.send({
+    res.status(204).send({
       filename: name
     });
   })
   .catch(function error(err) {
-    result.status(500);
-    result.send(err);
+    res.status(500).send(err);
     next(err);
   });
 };
