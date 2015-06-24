@@ -38,7 +38,9 @@ nock('http://testmailservice.com')
 describe('Email api', function testEmailApi() {
   it('can send an email', function sendEmail(done) {
     var form = {
-      form: smtpScaffolding.payload
+      form: {
+        dataModel: smtpScaffolding.payload
+      }
     };
 
     request.post('http://testmailservice.com/email/send', form, function testResponse(err, res, body) {
